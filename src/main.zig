@@ -12,12 +12,19 @@ pub fn main() !void {
     };
 
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer {
+        const deinit_status = gpa.deinit();
+        if (deinit_status == .leak) {
+            std.debug.print("Memory leak detected!\n", .{});
+        }
+    }
     const gpa_alloc = gpa.allocator();
 
     const filename = try gpa_alloc.dupe(u8, first_arg);
     defer gpa_alloc.free(filename);
 
     var vm = try yepvm.VM.init(gpa_alloc);
+    defer vm.deinit();
     try vm.load_file(filename, gpa_alloc);
     try vm.run();
 }
