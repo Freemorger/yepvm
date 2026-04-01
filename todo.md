@@ -1,1 +1,3 @@
 - math instrs
+- less boilerplate in add 
+- a bit better cli maybe

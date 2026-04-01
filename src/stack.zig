@@ -111,3 +111,18 @@ pub fn op_swap(self: *vm.VM) !void {
 
     self.ip += 1;
 }
+
+/// `cast` - performs type cast of top stack frame into specified 
+/// 0x14, size: 2 
+/// Args: typeid (1 byte)
+pub fn op_cast(self: *vm.VM) !void {
+    var slot1 = self.stack.pop() orelse return vm.VmError.UnexpectedEOS;
+    
+    const typeid = self.program.items[self.ip + 1];
+    const vmtype = try std.meta.intToEnum(vals.VmType, typeid);
+
+    slot1.val = try slot1.val.cast(vmtype, self.alloc);
+    try self.stack.append(self.alloc, slot1);
+
+    self.ip += 2;
+}

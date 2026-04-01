@@ -8,4 +8,4 @@ Zig compiler of latest version
 zig build run -- program.bin
 ```
 ## Why?
-I wanted to learn new language (Zig) and create something useful at once. 
+I wanted to learn something new (Zig) and create something useful at once. 

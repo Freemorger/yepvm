@@ -1,8 +1,6 @@
-# v0.0.2
-- strs 
-- `vm.deinit` and stuff 
-- extracted stack instrs into `src/stack.zig`
-new instrs:
-1. `pop` 
-2. `dupe`
-3. `swap`
+# v0.0.3
+- fixed double free in `print` instr 
+- fixes
+## new instrs:
+`cast` - 0x14, casts value into specific type 
+`add` - arithmetical addition or str concat

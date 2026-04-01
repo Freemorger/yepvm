@@ -1,6 +1,7 @@
-const std = @import("std");
-const stack = @import("stack.zig");
+const std    = @import("std");
+const stack  = @import("stack.zig");
 const vmvals = @import("values.zig");
+const vmmath = @import("instrs/maths.zig");
 
 pub const VmError = error {
     IllegalInstruction,
@@ -8,6 +9,8 @@ pub const VmError = error {
     UnexpectedEOS, // end of stack
     UnexpectedType,
     UnexpectedVmType,
+    TypeMismatch,
+    UnknownCast,
 };
 
 pub const VM = struct {
@@ -92,9 +95,6 @@ pub const VM = struct {
             },
             vmvals.VmType.Str => |s| {
                 std.debug.print("{s}", .{s.str});
-                if (s.owned) {
-                    self.alloc.free(s.str);
-                }
             },
         }
         self.ip += 1;
@@ -114,7 +114,7 @@ pub const VM = struct {
             &buf,
             self.program.items[self.ip..self.ip + typesize]
         );
-        const val = try val_from_be_bytes(T, &buf);
+        const val = try val_from_le_bytes(T, &buf);
 
         const vmv = switch (T) {
             usize, u64, u32 => vmvals.VmValue {
@@ -141,7 +141,7 @@ pub const VM = struct {
     } 
 };
 
-fn val_from_be_bytes(comptime T: type, bytes: *[@sizeOf(T)]u8) !T {
+fn val_from_le_bytes(comptime T: type, bytes: *[@sizeOf(T)]u8) !T {
     switch (@typeInfo(T)) {
         .int => {
             const val = std.mem.readInt(
@@ -177,12 +177,18 @@ fn makeOperations() [256]InstructionHandler {
         h.* = VM.unimplemented;
     }
 
+    
     handlers[0xFF] = VM.op_halt;
     handlers[0x01] = VM.op_print;
+    
     handlers[0x10] = stack.op_push;
     handlers[0x11] = stack.op_pop;
     handlers[0x12] = stack.op_dupe;
     handlers[0x13] = stack.op_swap;
+    handlers[0x14] = stack.op_cast;
 
+    handlers[0x20] = vmmath.op_add;
+
+    
     return handlers;
 }
