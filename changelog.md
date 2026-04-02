@@ -1,6 +1,8 @@
-# v0.0.3
-- fixed double free in `print` instr 
-- fixes
-## new instrs:
-`cast` - 0x14, casts value into specific type 
-`add` - arithmetical addition or str concat
+# v0.0.4
+- refactor of math
+new ops:
+`sub` (0x21) - subtraction
+`mul` (0x22) - multiplication (also works for strings)
+`div` (0x23) - division 
+`rem` (0x24) - get remainder
+`sqrt` (0x25) - get square root (returns float)

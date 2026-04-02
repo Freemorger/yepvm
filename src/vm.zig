@@ -65,7 +65,7 @@ pub const VM = struct {
     pub fn run(self: *VM) !void {
         while (self.ip < self.program.items.len and self.running) {
             const opcode = self.program.items[self.ip];
-            // std.debug.print("{}\n", .{opcode});
+            // std.debug.print("DBG opcode {}\n", .{opcode});
             try OPERATIONS[opcode](self);
         } 
     }
@@ -188,7 +188,11 @@ fn makeOperations() [256]InstructionHandler {
     handlers[0x14] = stack.op_cast;
 
     handlers[0x20] = vmmath.op_add;
-
+    handlers[0x21] = vmmath.op_sub;
+    handlers[0x22] = vmmath.op_mul;
+    handlers[0x23] = vmmath.op_div;
+    handlers[0x24] = vmmath.op_rem;
+    handlers[0x25] = vmmath.op_sqrt;
     
     return handlers;
 }

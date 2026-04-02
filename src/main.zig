@@ -1,6 +1,8 @@
 const std = @import("std");
 const yepvm = @import("vm.zig");
 
+const YEPVM_VERSION = "v0.0.4";
+
 pub fn main() !void {
     var args = std.process.args();
     
@@ -10,6 +12,11 @@ pub fn main() !void {
         std.debug.print("Error: Missing argument\n", .{});
         return;
     };
+
+    if (std.mem.eql(u8, first_arg, "--version")) {
+        std.debug.print("Yepvm {s}\n", .{YEPVM_VERSION});
+        return;
+    }
 
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer {
