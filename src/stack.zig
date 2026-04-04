@@ -126,3 +126,20 @@ pub fn op_cast(self: *vm.VM) !void {
 
     self.ip += 2;
 }
+
+/// `dmpfl` - dump flags into new uint stack slot 
+/// Opcode: 0x15, size: 1 
+/// Args: -
+pub fn op_dmpflags(self: *vm.VM) !void {
+    const slot = StackSlot {
+        .addr = self.stack.items.len,
+        .val  = vals.VmValue { .Uint = self.flags },
+    };
+
+    try self.stack.append(
+        self.alloc, 
+        slot 
+    );
+
+    self.ip += 1;
+}

@@ -53,6 +53,28 @@ pub const VmValue = union(VmType) {
         return null;
     }
 
+    /// Returns whether value is 0.
+    /// For strs, returns whether str is empty 
+    pub fn is_zero(self: *const VmValue) bool {
+        return switch (self.*) {
+            VmValue.Uint  => |u| u == 0,
+            VmValue.Int   => |i| i == 0,
+            VmValue.Float => |f| f == 0.0,
+            VmValue.Str   => |s| std.mem.eql(u8, s.str, ""),
+        };
+    }
+
+    /// Returns whether value is <0 
+    /// For strs and uints:: always false 
+    pub fn is_negative(self: *const VmValue) bool {
+        return switch (self.*) {
+            VmValue.Uint  => false,
+            VmValue.Int   => |i| i < 0,
+            VmValue.Float => |f| f < 0.0,
+            VmValue.Str   => false,
+        };
+    } 
+
     pub fn cast(self: *VmValue, target: VmType, alloc: std.mem.Allocator) !VmValue {
         switch (self.*) {
             VmValue.Uint => |u| {

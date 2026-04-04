@@ -1,2 +1,3 @@
-- jmp instrs
+- logical instrs
+- funcs
 - tests

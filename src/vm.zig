@@ -2,6 +2,7 @@ const std    = @import("std");
 const stack  = @import("stack.zig");
 const vmvals = @import("values.zig");
 const vmmath = @import("instrs/maths.zig");
+const vmjmps = @import("instrs/jmps.zig");
 
 pub const VmError = error {
     IllegalInstruction,
@@ -13,6 +14,15 @@ pub const VmError = error {
     UnknownCast,
 };
 
+pub const VmFlags = enum(u8) {
+    Zero = 0,
+    Negative = 1,
+
+    pub fn getBit(self: VmFlags) u8 {
+        return @as(u8, 1) << @truncate(@intFromEnum(self));
+    }
+};
+
 pub const VM = struct {
     ip: usize, // instruction pointer 
     running: bool,
@@ -22,6 +32,8 @@ pub const VM = struct {
     call_stack: std.ArrayList(stack.StackFrame),
     heap: std.ArrayList(u8),
     alloc: std.mem.Allocator,
+
+    flags: u64, 
 
     pub fn init(alloc: std.mem.Allocator) !VM {
         return VM {
@@ -36,6 +48,7 @@ pub const VM = struct {
             .heap = try std.ArrayList(u8)
                 .initCapacity(alloc, 4096),
             .alloc = alloc,
+            .flags = 0,
         };
     }
 
@@ -65,7 +78,7 @@ pub const VM = struct {
     pub fn run(self: *VM) !void {
         while (self.ip < self.program.items.len and self.running) {
             const opcode = self.program.items[self.ip];
-            // std.debug.print("DBG opcode {}\n", .{opcode});
+            // std.debug.print("DBG opcode {}, flags: {}\n", .{opcode, self.flags});
             try OPERATIONS[opcode](self);
         } 
     }
@@ -186,6 +199,7 @@ fn makeOperations() [256]InstructionHandler {
     handlers[0x12] = stack.op_dupe;
     handlers[0x13] = stack.op_swap;
     handlers[0x14] = stack.op_cast;
+    handlers[0x15] = stack.op_dmpflags;
 
     handlers[0x20] = vmmath.op_add;
     handlers[0x21] = vmmath.op_sub;
@@ -193,6 +207,11 @@ fn makeOperations() [256]InstructionHandler {
     handlers[0x23] = vmmath.op_div;
     handlers[0x24] = vmmath.op_rem;
     handlers[0x25] = vmmath.op_sqrt;
+
+    handlers[0x30] = vmjmps.op_jmp;
+    handlers[0x31] = vmjmps.op_jz;
+    handlers[0x32] = vmjmps.op_jnz;
+    handlers[0x33] = vmjmps.op_jl;
     
     return handlers;
 }

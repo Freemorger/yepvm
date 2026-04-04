@@ -1,7 +1,7 @@
 const std = @import("std");
 const yepvm = @import("vm.zig");
 
-const YEPVM_VERSION = "v0.0.4";
+const YEPVM_VERSION = "v0.0.5";
 
 pub fn main() !void {
     var args = std.process.args();

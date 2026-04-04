@@ -46,6 +46,16 @@ pub fn op_sqrt(self: *vm.VM) !void {
     return unaryOp(self, sqrtImpl);
 }
 
+/// `cmp` - compare 2 top popped stack elems 
+/// Sets: Zero flags if equal, negative flag if lhs < rhs 
+/// Opcode: 0x26, size: 1
+/// Args: -
+pub fn op_cmp(self: *vm.VM) !void {
+    try binaryOp(self, subImpl);
+    
+    _ = self.stack.pop();
+}
+
 fn binaryOp(
     self: *vm.VM,
     op: fn (alloc: std.mem.Allocator, a: vals.VmValue, b: vals.VmValue) anyerror!vals.VmValue,
@@ -63,6 +73,27 @@ fn binaryOp(
 
     const result = try op(self.alloc, lhs.val, rhs.val);
 
+    if (result.is_zero()) {
+        self.flags |= vm.VmFlags.Zero.getBit();
+    } else {
+        self.flags &= ~vm.VmFlags.Zero.getBit();
+    }
+
+    if (result.is_negative()) {
+        self.flags |= vm.VmFlags.Negative.getBit();
+    } else {
+        self.flags &= ~vm.VmFlags.Negative.getBit();
+    }
+
+    switch (lhs.val) {
+        .Uint => |uv1| {
+            if (uv1 < rhs.val.Uint) {
+                self.flags |= vm.VmFlags.Negative.getBit();
+            }
+        },
+        else => {}
+    }
+
     try self.stack.append(self.alloc, .{
         .addr = self.stack.items.len,
         .val = result,
@@ -78,6 +109,18 @@ fn unaryOp(
     const lhs = self.stack.pop() orelse return vm.VmError.UnexpectedEOS;
 
     const result = try op(self.alloc, lhs.val);
+
+    if (result.is_zero()) {
+        self.flags |= vm.VmFlags.Zero.getBit();
+    } else {
+        self.flags &= ~vm.VmFlags.Zero.getBit();
+    }
+
+    if (result.is_negative()) {
+        self.flags |= vm.VmFlags.Negative.getBit();
+    } else {
+        self.flags &= ~vm.VmFlags.Negative.getBit();
+    }
 
     try self.stack.append(self.alloc, .{
         .addr = self.stack.items.len,
