@@ -86,7 +86,7 @@ pub fn op_jl(self: *vm.VM) !void {
     }
 }
 
-/// `jl` - jump if greater (negative and zero flags not set)
+/// `jg` - jump if greater (negative and zero flags not set)
 /// 0x34, size: 10 
 /// Args: flags (1b), addr (8b) 
 /// Flags: last bit for rel/absolute addr, 

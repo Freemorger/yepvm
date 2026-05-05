@@ -1,3 +1,5 @@
-- logical instrs
+- bit shifts 
+- cmp, set/get flags
 - funcs
+- heap, gc 
 - tests

@@ -56,7 +56,7 @@ pub fn op_cmp(self: *vm.VM) !void {
     _ = self.stack.pop();
 }
 
-fn binaryOp(
+pub fn binaryOp(
     self: *vm.VM,
     op: fn (alloc: std.mem.Allocator, a: vals.VmValue, b: vals.VmValue) anyerror!vals.VmValue,
 ) !void {
@@ -102,7 +102,7 @@ fn binaryOp(
     self.ip += 1;
 }
 
-fn unaryOp(
+pub fn unaryOp(
     self: *vm.VM,
     op: fn (alloc: std.mem.Allocator, a: vals.VmValue) anyerror!vals.VmValue,
 ) !void {

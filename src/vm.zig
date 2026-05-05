@@ -3,6 +3,7 @@ const stack  = @import("stack.zig");
 const vmvals = @import("values.zig");
 const vmmath = @import("instrs/maths.zig");
 const vmjmps = @import("instrs/jmps.zig");
+const vmlogi = @import("instrs/logics.zig");
 
 pub const VmError = error {
     IllegalInstruction,
@@ -12,6 +13,7 @@ pub const VmError = error {
     UnexpectedVmType,
     TypeMismatch,
     UnknownCast,
+    FloatBitOp, 
 };
 
 pub const VmFlags = enum(u8) {
@@ -212,6 +214,16 @@ fn makeOperations() [256]InstructionHandler {
     handlers[0x31] = vmjmps.op_jz;
     handlers[0x32] = vmjmps.op_jnz;
     handlers[0x33] = vmjmps.op_jl;
+    handlers[0x34] = vmjmps.op_jg;
+    handlers[0x35] = vmjmps.op_jge;
+    handlers[0x36] = vmjmps.op_jle;
+
+    handlers[0x40] = vmlogi.op_or;
+    handlers[0x41] = vmlogi.op_and;
+    handlers[0x42] = vmlogi.op_xor;
+    handlers[0x43] = vmlogi.op_not;
+    handlers[0x44] = vmlogi.op_lnot;
+    handlers[0x45] = vmlogi.op_nz;
     
     return handlers;
 }
