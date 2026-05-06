@@ -209,6 +209,7 @@ fn makeOperations() [256]InstructionHandler {
     handlers[0x23] = vmmath.op_div;
     handlers[0x24] = vmmath.op_rem;
     handlers[0x25] = vmmath.op_sqrt;
+    handlers[0x26] = vmmath.op_cmp;
 
     handlers[0x30] = vmjmps.op_jmp;
     handlers[0x31] = vmjmps.op_jz;
@@ -224,6 +225,8 @@ fn makeOperations() [256]InstructionHandler {
     handlers[0x43] = vmlogi.op_not;
     handlers[0x44] = vmlogi.op_lnot;
     handlers[0x45] = vmlogi.op_nz;
+    handlers[0x46] = vmlogi.op_shl;
+    handlers[0x47] = vmlogi.op_shr;
     
     return handlers;
 }

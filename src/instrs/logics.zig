@@ -130,3 +130,51 @@ fn nz_impl(alloc: std.mem.Allocator, a: vals.VmValue) !vals.VmValue {
         else => vm.VmError.UnexpectedVmType,
     };
 }
+
+/// 0x46, size: 1 
+/// Shl aka bit shift left 
+pub fn op_shl(self: *vm.VM) !void {
+    return maths.binaryOp(self, shl_impl);
+}
+
+fn shl_impl(alloc: std.mem.Allocator,
+    a: vals.VmValue,
+    b: vals.VmValue) !vals.VmValue {
+    _ = alloc;
+    return switch (a) {
+        .Uint => |uv1| switch (b) {
+            .Uint => |uv2| .{ .Uint = uv1 << @intCast(uv2) },
+            else => vm.VmError.TypeMismatch
+        },
+        .Int => |iv1| switch (b) {
+            .Int => |iv2| .{ .Int = iv1 << @intCast(iv2) },
+            else => vm.VmError.TypeMismatch
+        },
+        .Float => vm.VmError.FloatBitOp,
+        else => vm.VmError.UnexpectedVmType, 
+    };
+}
+
+/// 0x47, size: 1 
+/// Shr aka bit shift right 
+pub fn op_shr(self: *vm.VM) !void {
+    return maths.binaryOp(self, shr_impl);
+}
+
+fn shr_impl(alloc: std.mem.Allocator,
+    a: vals.VmValue,
+    b: vals.VmValue) !vals.VmValue {
+    _ = alloc;
+    return switch (a) {
+        .Uint => |uv1| switch (b) {
+            .Uint => |uv2| .{ .Uint = uv1 >> @intCast(uv2) },
+            else => vm.VmError.TypeMismatch
+        },
+        .Int => |iv1| switch (b) {
+            .Int => |iv2| .{ .Int = iv1 >> @intCast(iv2) },
+            else => vm.VmError.TypeMismatch
+        },
+        .Float => vm.VmError.FloatBitOp,
+        else => vm.VmError.UnexpectedVmType, 
+    };
+}
