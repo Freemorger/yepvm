@@ -1,3 +1,4 @@
+- store/load for locals
 - funcs
 - heap, gc 
 - tests

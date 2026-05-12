@@ -1,10 +1,17 @@
-const std = @import("std");
+const std  = @import("std");
 const vals = @import("values.zig");
-const vm = @import("vm.zig");
+const vm   = @import("vm.zig");
 
 pub const StackSlot = struct {
     addr: usize,
     val: vals.VmValue,
+
+    pub fn def() StackSlot {
+        return StackSlot {
+            .addr = 0,
+            .val = .{ .Uint = 0}
+        };
+    }
 
     pub fn deinit(self: *StackSlot, alloc: std.mem.Allocator) void {
         switch (self.val) {
@@ -22,6 +29,16 @@ pub const StackFrame = struct {
     ret_addr: usize,
     bp: usize,
     locals: std.ArrayList(StackSlot),
+
+    pub fn new(ret_addr: usize, alloc: std.mem.Allocator, init_cap: usize) 
+        !StackFrame {
+        
+        return StackFrame {
+            .ret_addr = ret_addr,
+            .bp = 0,
+            .locals = std.ArrayList(StackSlot).initCapacity(alloc, init_cap)
+        };
+    }
 };
 
 /// `push` - pushes const value on stack 
@@ -30,7 +47,7 @@ pub const StackFrame = struct {
 pub fn op_push(self: *vm.VM) !void {
     const typeid = self.program.items[self.ip + 1];
     self.ip += 2; // instr and type tag  
-    const vmtype = try std.meta.intToEnum(vals.VmType, typeid);
+    const vmtype: vals.VmType = @enumFromInt(typeid);
 
     switch (vmtype) {
         vals.VmType.Uint => {
@@ -118,8 +135,8 @@ pub fn op_swap(self: *vm.VM) !void {
 pub fn op_cast(self: *vm.VM) !void {
     var slot1 = self.stack.pop() orelse return vm.VmError.UnexpectedEOS;
     
-    const typeid = self.program.items[self.ip + 1];
-    const vmtype = try std.meta.intToEnum(vals.VmType, typeid);
+    const typeid              = self.program.items[self.ip + 1];
+    const vmtype: vals.VmType = @enumFromInt(typeid);
 
     slot1.val = try slot1.val.cast(vmtype, self.alloc);
     try self.stack.append(self.alloc, slot1);

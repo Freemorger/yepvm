@@ -4,6 +4,7 @@ const vmvals = @import("values.zig");
 const vmmath = @import("instrs/maths.zig");
 const vmjmps = @import("instrs/jmps.zig");
 const vmlogi = @import("instrs/logics.zig");
+const vmvars = @import("instrs/vars.zig");
 
 pub const VmError = error {
     IllegalInstruction,
@@ -27,6 +28,7 @@ pub const VmFlags = enum(u8) {
 
 pub const VM = struct {
     ip: usize, // instruction pointer 
+    csp: usize, // call stack pointer 
     running: bool,
 
     program: std.ArrayList(u8),
@@ -34,12 +36,14 @@ pub const VM = struct {
     call_stack: std.ArrayList(stack.StackFrame),
     heap: std.ArrayList(u8),
     alloc: std.mem.Allocator,
+    io: std.Io,
 
     flags: u64, 
 
-    pub fn init(alloc: std.mem.Allocator) !VM {
+    pub fn init(alloc: std.mem.Allocator, io: std.Io) !VM {
         return VM {
             .ip = 0,
+            .csp = 0,
             .running = true,
             .program = try std.ArrayList(u8)
                 .initCapacity(alloc, 4096),
@@ -50,6 +54,7 @@ pub const VM = struct {
             .heap = try std.ArrayList(u8)
                 .initCapacity(alloc, 4096),
             .alloc = alloc,
+            .io = io,
             .flags = 0,
         };
     }
@@ -63,11 +68,11 @@ pub const VM = struct {
 
     /// Loads program from file 
     pub fn load_file(self: *VM, path: []const u8, alloc: std.mem.Allocator) !void {
-        const file = try std.fs.cwd().openFile(path, .{});
-        defer file.close();
+        const file = try std.Io.Dir.cwd().openFile(self.io, path, .{});
+        defer file.close(self.io);
 
         var buffer: [4096]u8 = undefined;
-        var reader = file.reader(&buffer);
+        var reader = file.reader(self.io, &buffer);
         const filesize = try reader.getSize();
 
         try self.program.ensureUnusedCapacity(alloc, filesize);
@@ -227,6 +232,8 @@ fn makeOperations() [256]InstructionHandler {
     handlers[0x45] = vmlogi.op_nz;
     handlers[0x46] = vmlogi.op_shl;
     handlers[0x47] = vmlogi.op_shr;
-    
+   
+    handlers[0x50] = vmvars.op_lstore;
+
     return handlers;
 }

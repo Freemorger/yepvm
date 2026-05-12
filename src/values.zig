@@ -213,7 +213,7 @@ pub const VmValue = union(VmType) {
                     }
                 };
             },
-            .Str => |_| {
+            .Str => {
                 return self.*; 
             }
         }

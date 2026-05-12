@@ -2,7 +2,7 @@
 Small stack virtual machine with its own bytecode. Will be used as 
 interpreted language runtime later.
 ## Dependencies
-Zig compiler of latest version
+Zig compiler of 0.16.0
 ## Build && run 
 ```sh
 zig build run -- program.bin
